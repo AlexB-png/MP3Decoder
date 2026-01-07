@@ -4,24 +4,17 @@
 #include <filesystem>
 #include <SFML/Audio.hpp>
 #include <thread>
+#include <list>
 
 int main() {
+    std::list<std::string> songs;
     const std::filesystem::path folder = "Songs";
+
     for (const auto& entry : std::filesystem::directory_iterator(folder)) {
-        std::cout << entry.path() << '\n';
+        songs.push_back(entry.path());
+    };
 
-        sf::Music music;
-
-        if (!music.openFromFile(entry.path())) {
-            continue;
-        }
-
-        music.play();
-
-        music.setVolume(100.f);
-
-        while (music.getStatus() == sf::Music::Status::Playing) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
-    }
-    }
+    for (const auto& song : songs) {
+        std::cout << song << '\n';
+    };
+}
