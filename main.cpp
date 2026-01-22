@@ -1,29 +1,35 @@
 #include <SFML/Audio.hpp>
 #include <iostream>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 int main() {
-    sf::Music music; // keep it alive for the duration of the program
+    fs::path pathToShow = "Songs";
+    sf::Music music;
 
-    if (!music.openFromFile("Songs/Mellohi.mp3")) {
-        std::cout << "Fail!" << '\n';
-        return -1;
-    }
+    for (const auto& entry : fs::directory_iterator(pathToShow)) {
+        std::cout << entry.path().string() << std::endl;
 
-    music.setLooping(false);
-    music.play(); // non-blocking, music plays in background
+        if (!music.openFromFile(entry.path().string())) {
+            std::cout << "Fail!" << '\n';
+            return -1;
+        }
 
-    std::cout << "Music is playing. Doing other things..." << std::endl;
+        music.setLooping(false);
+        music.play();
 
+        std::cout << "Music is playing. Doing other things..." << std::endl;
 
+        // Main loop can do other work
+        while (static_cast<int>(music.getStatus()) == 2) {
+            std::cout << static_cast<int>(music.getStatus()) << '\n';
+            sf::sleep(sf::seconds(0.1));
+        }
 
-    // Main loop can do other work
-    while (static_cast<int>(music.getStatus()) == 2) {
-        std::cout << static_cast<int>(music.getStatus()) << '\n';
-        sf::sleep(sf::seconds(1));
-    }
+        music.stop(); // stop music if needed
+        std::cout << "Music stopped.\n";
 
-    music.stop(); // stop music if needed
-    std::cout << "Music stopped.\n";
-
-    return 0;
+        return 0;
+}
 }
